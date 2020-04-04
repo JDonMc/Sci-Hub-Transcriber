@@ -252,6 +252,20 @@ class SciHub(object):
         """
         print(path)
         article_info = extract_information(path)
+        print(article_info.title)
+        print(article_info.author)
+
+        data = {"username": article_info.author}
+        data_json = json.dumps(data)
+        headers = {'Content-type': 'application/json'}
+        response = requests.post("http://127.0.0.1:8000/Glocal/authors/", data=data_json, headers=headers)
+
+
+        data = {"title": article_info.title, "author": "http://127.0.0.1:8000/Glocal/author/retrieve_by_username/"+article_info.author}
+        data_json = json.dumps(data)
+        headers = {'Content-type': 'application/json'}
+        response = requests.post("http://127.0.0.1:8000/Glocal/post/", data=data_json, headers=headers)
+
 
         with open(path, 'wb') as f:
             f.write(data)
