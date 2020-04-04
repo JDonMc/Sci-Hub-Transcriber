@@ -147,7 +147,7 @@ class SciHub(object):
             start += 10
 
     @retry(wait_random_min=100, wait_random_max=1000, stop_max_attempt_number=10)
-    def download(self, identifier, destination='', path=None):
+    def download(self, identifier, abstract='', destination='', path=None):
         """
         Downloads a paper from sci-hub given an indentifier (DOI, PMID, URL).
         Currently, this can potentially be blocked by a captcha if a certain
@@ -157,11 +157,11 @@ class SciHub(object):
 
         if not 'err' in data:
             self._save(data['pdf'],
-                       os.path.join(destination, path if path else data['name']))
+                       os.path.join(destination, path if path else data['name']), abstract)
 
         return data
 
-    def fetch(self, identifier):
+    def fetch(self, identifier, abstract):
         """
         Fetches the paper by first retrieving the direct link to the pdf.
         If the indentifier is a DOI, PMID, or URL pay-wall, then use Sci-Hub
@@ -246,7 +246,7 @@ class SciHub(object):
         else:
             return 'doi'
 
-    def _save(self, data, path):
+    def _save(self, data, path, abstract):
         """
         Save a file give data and a path.
         """
@@ -261,7 +261,7 @@ class SciHub(object):
         response = requests.post("http://127.0.0.1:8000/Glocal/authors/", data=data_json, headers=headers)
 
 
-        data = {"title": article_info.title, "author": "http://127.0.0.1:8000/Glocal/author/retrieve_by_username/"+article_info.author}
+        data = {"title": article_info.title, "author": "http://127.0.0.1:8000/Glocal/author/retrieve_by_username/"+article_info.author, "body": abstract}
         data_json = json.dumps(data)
         headers = {'Content-type': 'application/json'}
         response = requests.post("http://127.0.0.1:8000/Glocal/post/", data=data_json, headers=headers)
@@ -383,6 +383,6 @@ if __name__ == '__main__':
             download = d['URL']
             output = "."
             sh = SciHub()
-            result = sh.download(download, output)
+            result = sh.download(download, output, abstract=d['abstract'])
 
 
