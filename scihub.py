@@ -30,6 +30,11 @@ urllib3.disable_warnings()
 # constants
 SCHOLARS_BASE_URL = 'https://scholar.google.com/scholar'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:27.0) Gecko/20100101 Firefox/27.0'}
+def load_words():
+    with open('words_alpha.txt') as word_file:
+        valid_words = set(word_file.read().split())
+
+    return valid_words
 
 
 def extract_information(pdf_path):
@@ -348,19 +353,22 @@ if __name__ == '__main__':
     result = sh.download(download, output)
 
     from habanero import Crossref
+    english_words = load_words()
+    # demo print
+    print('fate' in english_words)
+    for word in english_words:
+        cr = Crossref()
+        x = cr.works(query=word)
+        print(x['message'])
+        print(x['message']['total-results'])
+        print(x['message']['items'][0]['isbn-type'][0]['value'])
+        print(x['message']['items'][0]['abstract'])
+        print(x['message']['items'][0]['URL'])
 
-    cr = Crossref()
-    x = cr.works(query="ecology")
-    print(x['message'])
-    print(x['message']['total-results'])
-    print(x['message']['items'][0]['isbn-type'][0]['value'])
-    print(x['message']['items'][0]['abstract'])
-    print(x['message']['items'][0]['URL'])
-
-    for d in x['message']['items']:
-        download = d['URL']
-        output = "."
-        sh = SciHub()
-        result = sh.download(download, output)
+        for d in x['message']['items']:
+            download = d['URL']
+            output = "."
+            sh = SciHub()
+            result = sh.download(download, output)
 
 
